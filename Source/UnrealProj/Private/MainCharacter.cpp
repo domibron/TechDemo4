@@ -22,13 +22,34 @@ void AMainCharacter::BeginPlay()
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
-
+// tesdt
 // Called to bind functionality to input
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+
+	PlayerInputComponent->BindAxis("XKeys", this, &AMainCharacter::MoveForward);
+	PlayerInputComponent->BindAxis("YKeys", this, &AMainCharacter::MoveRight);
+
+	PlayerInputComponent->BindAction("JumpKey", IE_Pressed, this, &AMainCharacter::Jump);
 }
+
+void AMainCharacter::MoveForward(float Value)
+{
+	AMainCharacter::AddMovementInput(AMainCharacter::GetActorForwardVector(), Value, true);
+}
+
+void AMainCharacter::MoveRight(float Value)
+{
+	AMainCharacter::AddMovementInput(AMainCharacter::GetActorRightVector(), Value, true);
+}
+
+void AMainCharacter::Jump()
+{
+	Super::Jump();
+}
+
 
