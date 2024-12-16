@@ -8,7 +8,7 @@ AMainCharacter::AMainCharacter()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
+	
 }
 
 // Called when the game starts or when spawned
@@ -35,6 +35,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAxis("YKeys", this, &AMainCharacter::MoveRight);
 
 	PlayerInputComponent->BindAction("JumpKey", IE_Pressed, this, &AMainCharacter::Jump);
+
+	PlayerInputComponent->BindAxis("Mouse X", this, &AMainCharacter::LookRight);
+	PlayerInputComponent->BindAxis("Mouse Y", this, &AMainCharacter::LookUp);
 }
 
 void AMainCharacter::MoveForward(float Value)
@@ -45,6 +48,22 @@ void AMainCharacter::MoveForward(float Value)
 void AMainCharacter::MoveRight(float Value)
 {
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorRightVector(), Value, true);
+}
+
+void AMainCharacter::LookRight(float Value)
+{
+	// FRotator rotation = GetActorRotation();
+	//
+	// rotation += FRotator(0, Value, 0);
+	//
+	// SetActorRotation(rotation);
+
+	AddControllerYawInput(Value);
+}
+
+void AMainCharacter::LookUp(float Value)
+{
+	AddControllerPitchInput(Value * -1.0f);
 }
 
 void AMainCharacter::Jump()
