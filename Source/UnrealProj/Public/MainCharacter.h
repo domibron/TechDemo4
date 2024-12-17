@@ -15,6 +15,9 @@ public:
 	// Sets default values for this character's properties
 	AMainCharacter();
 
+	float CurrentHealth;
+	float MaxHealth = 200.0f;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -33,7 +36,8 @@ private:
 	void LookRight(float Value);
 	void LookUp(float Value);
 
+	void Fire();
+	void Aim();
 	
-	
-	void Jump();
+	void JumpPressed();
 };

@@ -3,6 +3,9 @@
 
 #include "MainCharacter.h"
 
+#include "Camera/CameraComponent.h"
+
+
 // Sets default values
 AMainCharacter::AMainCharacter()
 {
@@ -15,6 +18,8 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CurrentHealth = MaxHealth;
 	
 }
 
@@ -22,6 +27,11 @@ void AMainCharacter::BeginPlay()
 void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
+	if (AutoReceiveInput == 1) GLog->Log("Player1");
+	if (AutoReceiveInput == 2) GLog->Log("Player2");
+	//GLog->Log(FString::FromInt(AutoReceiveInput));
 	
 }
 // tesdt
@@ -30,14 +40,34 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	
+	
+		PlayerInputComponent->BindAxis("XKeys", this, &AMainCharacter::MoveForward);
+		PlayerInputComponent->BindAxis("YKeys", this, &AMainCharacter::MoveRight);
+	
+		PlayerInputComponent->BindAction("JumpKey", IE_Pressed, this, &AMainCharacter::JumpPressed);
+	
+		PlayerInputComponent->BindAxis("Mouse X", this, &AMainCharacter::LookRight);
+		PlayerInputComponent->BindAxis("Mouse Y", this, &AMainCharacter::LookUp);
+	
+		PlayerInputComponent->BindAction("FireKey", IE_Pressed, this, &AMainCharacter::Fire);
+		PlayerInputComponent->BindAction("AimKey", IE_Pressed, this, &AMainCharacter::Aim);
 
-	PlayerInputComponent->BindAxis("XKeys", this, &AMainCharacter::MoveForward);
-	PlayerInputComponent->BindAxis("YKeys", this, &AMainCharacter::MoveRight);
 
-	PlayerInputComponent->BindAction("JumpKey", IE_Pressed, this, &AMainCharacter::Jump);
+	
+		PlayerInputComponent->BindAxis("XStick", this, &AMainCharacter::MoveForward);
+		PlayerInputComponent->BindAxis("YStick", this, &AMainCharacter::MoveRight);
 
-	PlayerInputComponent->BindAxis("Mouse X", this, &AMainCharacter::LookRight);
-	PlayerInputComponent->BindAxis("Mouse Y", this, &AMainCharacter::LookUp);
+		PlayerInputComponent->BindAction("JumpButton", IE_Pressed, this, &AMainCharacter::JumpPressed);
+
+		PlayerInputComponent->BindAxis("XLookStick", this, &AMainCharacter::LookRight);
+		PlayerInputComponent->BindAxis("YLookStick", this, &AMainCharacter::LookUp);
+
+		PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AMainCharacter::Fire);
+		PlayerInputComponent->BindAction("AimButton", IE_Pressed, this, &AMainCharacter::Aim);
+	
+	
+
 }
 
 void AMainCharacter::MoveForward(float Value)
@@ -63,12 +93,36 @@ void AMainCharacter::LookRight(float Value)
 
 void AMainCharacter::LookUp(float Value)
 {
+
+	
 	AddControllerPitchInput(Value * -1.0f);
 }
 
-void AMainCharacter::Jump()
+void AMainCharacter::Fire()
 {
-	Super::Jump();
+	FHitResult Hit;
+
+	UCameraComponent* CameraComponent = FindComponentByClass<UCameraComponent>();
+	
+	FVector StartLocation = CameraComponent->GetComponentLocation();
+
+	FVector EndLocation = (CameraComponent->GetForwardVector() * 200)+StartLocation;
+
+	FCollisionQueryParams CollisionParams = FCollisionQueryParams();
+	
+
+	bool bHasHit = ActorLineTraceSingle(Hit, StartLocation, EndLocation, ECollisionChannel::ECC_PhysicsBody, CollisionParams);
+
+	
+}
+
+void AMainCharacter::Aim()
+{
+}
+
+void AMainCharacter::JumpPressed()
+{
+	Jump();
 }
 
 
