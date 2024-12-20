@@ -4,7 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
+
+// keep here otherwise it will break
 #include "MainCharacter.generated.h"
+
 
 UCLASS()
 class UNREALPROJ_API AMainCharacter : public ACharacter
@@ -29,7 +33,11 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void TakeDamage(float DamageAmount);
+
 private:
+	UCameraComponent* CameraComponent;
+	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
 

@@ -3,7 +3,7 @@
 
 #include "MainCharacter.h"
 
-#include "Camera/CameraComponent.h"
+#include "KismetTraceUtils.h"
 
 
 // Sets default values
@@ -19,6 +19,8 @@ void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CameraComponent = FindComponentByClass<UCameraComponent>();
+	
 	CurrentHealth = MaxHealth;
 	
 }
@@ -70,6 +72,11 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+void AMainCharacter::TakeDamage(float DamageAmount)
+{
+	CurrentHealth -= DamageAmount;
+}
+
 void AMainCharacter::MoveForward(float Value)
 {
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorForwardVector(), Value, true);
@@ -102,18 +109,37 @@ void AMainCharacter::Fire()
 {
 	FHitResult Hit;
 
-	UCameraComponent* CameraComponent = FindComponentByClass<UCameraComponent>();
-	
 	FVector StartLocation = CameraComponent->GetComponentLocation();
 
-	FVector EndLocation = (CameraComponent->GetForwardVector() * 200)+StartLocation;
+	FVector EndLocation = (CameraComponent->GetForwardVector() * 200000)+StartLocation;
 
 	FCollisionQueryParams CollisionParams = FCollisionQueryParams();
-	
 
-	bool bHasHit = ActorLineTraceSingle(Hit, StartLocation, EndLocation, ECollisionChannel::ECC_PhysicsBody, CollisionParams);
+	CollisionParams.bDebugQuery = false;
+	CollisionParams.bTraceComplex = true;
+	CollisionParams.TraceTag = TEXT("PLAYER");
+	
+	GLog->Log(TEXT("Fire"));
+
+	bool bHasHit = GetWorld()->LineTraceSingleByChannel(Hit, StartLocation, EndLocation, ECollisionChannel::ECC_PhysicsBody, CollisionParams);
+
+	//bool bDebugHit = false;
+	//FHitResult DebugHitRes;
 
 	
+	//DrawDebugLineTraceSingle(GetWorld(), StartLocation,EndLocation, EDrawDebugTrace::ForDuration,bDebugHit ,DebugHitRes,FColor::Red,FColor::Green, 5.0f  );
+	
+	if (bHasHit)
+	{
+		GLog->Log("Hit: " + Hit.GetActor()->GetName());
+		
+		AMainCharacter* player = Cast<AMainCharacter>(Hit.GetActor());
+
+		if (player)
+		{
+			player->TakeDamage(300.0f);
+		}
+	}
 }
 
 void AMainCharacter::Aim()
