@@ -3,7 +3,6 @@
 
 #include "MainCharacter.h"
 
-#include "KismetTraceUtils.h"
 
 
 // Sets default values
@@ -20,6 +19,9 @@ void AMainCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	CameraComponent = FindComponentByClass<UCameraComponent>();
+	NiagaraSystem = FindComponentByClass<UNiagaraComponent>();
+
+	
 	
 	CurrentHealth = MaxHealth;
 	
@@ -30,13 +32,60 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (currentFireTimeLeft > 0)
+	{
+		currentFireTimeLeft -= DeltaTime;
+	}
 	
-	if (AutoReceiveInput == 1) GLog->Log("Player1");
-	if (AutoReceiveInput == 2) GLog->Log("Player2");
+	//if (AutoReceiveInput == 1) GLog->Log("Player1");
+	//if (AutoReceiveInput == 2) GLog->Log("Player2");
 	//GLog->Log(FString::FromInt(AutoReceiveInput));
+
+	if (NiagaraSystem && bAiming)
+	{
+		if(!bLaserActive)
+		{
+			NiagaraSystem->Activate();
+			NiagaraSystem->RegisterComponent();
+		bLaserActive = true;
+		}
+		
+		// we could store this constantly. then use it for damage and laser.
+		FHitResult LaserHit;
+
+		FVector StartLocation = CameraComponent->GetComponentLocation();
+
+		FVector EndLocation = (CameraComponent->GetForwardVector() * 200000)+StartLocation;
+
+		FCollisionQueryParams CollisionParams = FCollisionQueryParams();
+
+		CollisionParams.bDebugQuery = false;
+		CollisionParams.bTraceComplex = true;
+		CollisionParams.TraceTag = TEXT("PLAYER");
+		CollisionParams.AddIgnoredActor(this);
+
+	
+		bool bLaserHit = GetWorld()->LineTraceSingleByChannel(LaserHit, StartLocation, EndLocation, ECollisionChannel::ECC_PhysicsBody, CollisionParams);
+
+		if (bLaserHit)
+		{
+			NiagaraSystem->SetVectorParameter("EndLocation", LaserHit.ImpactPoint);
+		}
+		else
+			{
+		NiagaraSystem->SetVectorParameter("EndLocation", GetActorLocation()+CameraComponent->GetForwardVector()*200000);
+			}
+		NiagaraSystem->SetVectorParameter("StartLocation", GetActorLocation()+FVector(0, 0, 60));
+	}
+	else if (bLaserActive)
+	{
+		NiagaraSystem->UnregisterComponent();
+		NiagaraSystem->Deactivate();
+		bLaserActive = false;
+	}
 	
 }
-// tesdt
+
 // Called to bind functionality to input
 void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -54,6 +103,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	
 		PlayerInputComponent->BindAction("FireKey", IE_Pressed, this, &AMainCharacter::Fire);
 		PlayerInputComponent->BindAction("AimKey", IE_Pressed, this, &AMainCharacter::Aim);
+		PlayerInputComponent->BindAction("AimKey", IE_Released, this, &AMainCharacter::UnAim);
 
 
 	
@@ -67,6 +117,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AMainCharacter::Fire);
 		PlayerInputComponent->BindAction("AimButton", IE_Pressed, this, &AMainCharacter::Aim);
+		PlayerInputComponent->BindAction("AimButton", IE_Released, this, &AMainCharacter::UnAim);
 	
 	
 
@@ -75,6 +126,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void AMainCharacter::TakeDamage(float DamageAmount)
 {
 	CurrentHealth -= DamageAmount;
+	GLog->Log(this->GetName() + " " + FString::FromInt(CurrentHealth));
 }
 
 void AMainCharacter::MoveForward(float Value)
@@ -107,6 +159,10 @@ void AMainCharacter::LookUp(float Value)
 
 void AMainCharacter::Fire()
 {
+	if (currentFireTimeLeft > 0) return;
+
+	currentFireTimeLeft = 1.0 / fireRate;
+	
 	FHitResult Hit;
 
 	FVector StartLocation = CameraComponent->GetComponentLocation();
@@ -118,6 +174,8 @@ void AMainCharacter::Fire()
 	CollisionParams.bDebugQuery = false;
 	CollisionParams.bTraceComplex = true;
 	CollisionParams.TraceTag = TEXT("PLAYER");
+	CollisionParams.AddIgnoredActor(this);
+
 	
 	GLog->Log(TEXT("Fire"));
 
@@ -137,13 +195,31 @@ void AMainCharacter::Fire()
 
 		if (player)
 		{
-			player->TakeDamage(300.0f);
+			if(Hit.GetComponent()->ComponentHasTag("Head"))
+			{
+				player->TakeDamage(headDamage);
+			}
+			else if(Hit.GetComponent()->ComponentHasTag("Body"))
+			{
+				player->TakeDamage(bodyDamage);
+				
+			}
+			
+			
 		}
 	}
 }
 
 void AMainCharacter::Aim()
 {
+	CameraComponent->FieldOfView = 30.0f;
+	bAiming = true;
+}
+
+void AMainCharacter::UnAim()
+{
+	CameraComponent->FieldOfView = 90.0f;
+	bAiming = false;
 }
 
 void AMainCharacter::JumpPressed()

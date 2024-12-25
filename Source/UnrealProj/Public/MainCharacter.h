@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 
+	#include "NiagaraFunctionLibrary.h"
+	#include "NiagaraComponent.h"
+
 // keep here otherwise it will break
 #include "MainCharacter.generated.h"
 
@@ -37,6 +40,19 @@ public:
 
 private:
 	UCameraComponent* CameraComponent;
+	UNiagaraComponent* NiagaraSystem;
+	
+	float currentFireTimeLeft = 0.0;
+	UPROPERTY(EditAnywhere)
+	float fireRate = 4.0;
+	
+	UPROPERTY(EditAnywhere)
+float bodyDamage = 10.0f;
+	UPROPERTY(EditAnywhere)
+	float headDamage = 50.0f;
+
+	bool bAiming = false;
+	bool bLaserActive = true;
 	
 	void MoveForward(float Value);
 	void MoveRight(float Value);
@@ -46,6 +62,7 @@ private:
 
 	void Fire();
 	void Aim();
+	void UnAim();
 	
 	void JumpPressed();
 };
