@@ -32,6 +32,16 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (ReloadTimeLeft > 0)
+	{
+		bReloading = true;
+		ReloadTimeLeft -= DeltaTime;
+	}
+	else if (bReloading){
+		bReloading = false;
+		ReloadAmmo();
+	}
+	
 	if (currentFireTimeLeft > 0)
 	{
 		currentFireTimeLeft -= DeltaTime;
@@ -129,6 +139,46 @@ void AMainCharacter::TakeDamage(float DamageAmount)
 	GLog->Log(this->GetName() + " " + FString::FromInt(CurrentHealth));
 }
 
+void AMainCharacter::Heal(float HealAmmount)
+{
+	CurrentHealth += HealAmmount;
+	
+	if (CurrentHealth > MaxHealth)
+	{
+		CurrentHealth = MaxHealth;
+	}
+}
+
+void AMainCharacter::GiveAmmo(int Ammount)
+{
+	AmmoPool += Ammount;
+}
+
+void AMainCharacter::GiveDamageBuff(float Mult, float Duration)
+{
+	DamageMultiplier = Mult;
+	DamageMultiplierDurationRemainder = Duration;
+}
+
+void AMainCharacter::ReloadAmmo()
+{
+	if (bReloading) return;
+
+	int ammoToTake = 0;
+	
+	if (AmmoPool >= MaxClipSize)
+	{
+		ammoToTake = MaxClipSize - AmmoInClip;
+	}
+	else if (AmmoPool < MaxClipSize && AmmoPool > 0)
+	{
+		ammoToTake = AmmoPool;
+	}
+
+	AmmoInClip += ammoToTake;
+	AmmoPool -= ammoToTake;
+}
+
 void AMainCharacter::MoveForward(float Value)
 {
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorForwardVector(), Value, true);
@@ -159,9 +209,10 @@ void AMainCharacter::LookUp(float Value)
 
 void AMainCharacter::Fire()
 {
-	if (currentFireTimeLeft > 0) return;
+	if (currentFireTimeLeft > 0 || AmmoInClip <= 0 || bReloading) return;
 
 	currentFireTimeLeft = 1.0 / fireRate;
+	AmmoInClip -= 1;
 	
 	FHitResult Hit;
 
@@ -220,6 +271,15 @@ void AMainCharacter::UnAim()
 {
 	CameraComponent->FieldOfView = 90.0f;
 	bAiming = false;
+}
+
+void AMainCharacter::BeginReload()
+{
+	if (AmmoPool > 0)
+	{
+		ReloadTimeLeft = ReloadDuration;
+	}
+	
 }
 
 void AMainCharacter::JumpPressed()
