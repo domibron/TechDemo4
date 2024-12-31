@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
+
 #include "MainCharacter.h"
+
 
 
 
@@ -18,12 +20,29 @@ void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	PlayerID = GetPlatformUserId();
+	
 	CameraComponent = FindComponentByClass<UCameraComponent>();
 	NiagaraSystem = FindComponentByClass<UNiagaraComponent>();
 
 	
 	
 	CurrentHealth = MaxHealth;
+
+	TArray<UUserWidget*> FoundWidgets;
+	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UPlayerUIUSerWidget::StaticClass(), true);
+
+	if (FoundWidgets.Num() > 0)
+	{
+		PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[0]);
+		
+	}
+
+	if (PlayerUI)
+	{
+		GLog->Log("Found UI");
+		bPLayerHasUI = true;
+	}
 	
 }
 
@@ -32,6 +51,8 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	
 	if (ReloadTimeLeft > 0)
 	{
 		bReloading = true;
@@ -46,6 +67,42 @@ void AMainCharacter::Tick(float DeltaTime)
 	{
 		currentFireTimeLeft -= DeltaTime;
 	}
+
+	float healthRes = CurrentHealth / MaxHealth;
+	
+	if(bPLayerHasUI) // I hate player spawning. would override but cannot be bothered. this works fine :3
+	{
+		
+		
+		if (PlayerID == 0)
+		{
+			PlayerUI->PlayerOneHealthPercentage = healthRes;
+			PlayerUI->PlayerOneWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
+		}
+		else
+		{
+			PlayerUI->PlayerTwoHealthPercentage = healthRes;
+			PlayerUI->PlayerTwoWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
+
+		}
+	}
+	else
+	{
+		TArray<UUserWidget*> FoundWidgets;
+		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UPlayerUIUSerWidget::StaticClass(), true);
+
+		if (FoundWidgets.Num() > 0)
+		{
+			PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[0]);
+		
+		}
+
+		if (PlayerUI)
+		{
+			GLog->Log("Found UI");
+			bPLayerHasUI = true;
+		}
+	}
 	
 	//if (AutoReceiveInput == 1) GLog->Log("Player1");
 	//if (AutoReceiveInput == 2) GLog->Log("Player2");
@@ -57,7 +114,7 @@ void AMainCharacter::Tick(float DeltaTime)
 		{
 			NiagaraSystem->Activate();
 			NiagaraSystem->RegisterComponent();
-		bLaserActive = true;
+			bLaserActive = true;
 		}
 		
 		// we could store this constantly. then use it for damage and laser.
@@ -82,9 +139,9 @@ void AMainCharacter::Tick(float DeltaTime)
 			NiagaraSystem->SetVectorParameter("EndLocation", LaserHit.ImpactPoint);
 		}
 		else
-			{
-		NiagaraSystem->SetVectorParameter("EndLocation", GetActorLocation()+CameraComponent->GetForwardVector()*200000);
-			}
+		{
+			NiagaraSystem->SetVectorParameter("EndLocation", GetActorLocation()+CameraComponent->GetForwardVector()*200000);
+		}
 		NiagaraSystem->SetVectorParameter("StartLocation", GetActorLocation()+FVector(0, 0, 60));
 	}
 	else if (bLaserActive)
@@ -93,6 +150,9 @@ void AMainCharacter::Tick(float DeltaTime)
 		NiagaraSystem->Deactivate();
 		bLaserActive = false;
 	}
+
+
+	
 	
 }
 
@@ -114,6 +174,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("FireKey", IE_Pressed, this, &AMainCharacter::Fire);
 		PlayerInputComponent->BindAction("AimKey", IE_Pressed, this, &AMainCharacter::Aim);
 		PlayerInputComponent->BindAction("AimKey", IE_Released, this, &AMainCharacter::UnAim);
+	
+		PlayerInputComponent->BindAction("ReloadKey", IE_Pressed, this, &AMainCharacter::Reload);
 
 
 	
@@ -128,7 +190,8 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("FireButton", IE_Pressed, this, &AMainCharacter::Fire);
 		PlayerInputComponent->BindAction("AimButton", IE_Pressed, this, &AMainCharacter::Aim);
 		PlayerInputComponent->BindAction("AimButton", IE_Released, this, &AMainCharacter::UnAim);
-	
+
+		PlayerInputComponent->BindAction("ReloadButton", IE_Pressed, this, &AMainCharacter::Reload);
 	
 
 }
@@ -136,7 +199,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void AMainCharacter::TakeDamage(float DamageAmount)
 {
 	CurrentHealth -= DamageAmount;
-	GLog->Log(this->GetName() + " " + FString::FromInt(CurrentHealth));
+	GLog->Log(this->GetName() + " " + FString::SanitizeFloat(CurrentHealth));
 }
 
 void AMainCharacter::Heal(float HealAmmount)
@@ -275,16 +338,19 @@ void AMainCharacter::UnAim()
 
 void AMainCharacter::BeginReload()
 {
-	if (AmmoPool > 0)
+	if (AmmoPool > 0 && !bReloading && AmmoInClip < MaxClipSize)
 	{
 		ReloadTimeLeft = ReloadDuration;
 	}
 	
 }
 
+void AMainCharacter::Reload()
+{
+	BeginReload();
+}
+
 void AMainCharacter::JumpPressed()
 {
 	Jump();
 }
-
-

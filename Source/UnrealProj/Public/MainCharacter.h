@@ -6,6 +6,9 @@
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 
+#include "Blueprint/WidgetBlueprintLibrary.h"
+#include "PlayerUIUSerWidget.h"
+
 	#include "NiagaraFunctionLibrary.h"
 	#include "NiagaraComponent.h"
 
@@ -44,7 +47,13 @@ private:
 	// resfs.
 	UCameraComponent* CameraComponent;
 	UNiagaraComponent* NiagaraSystem;
+	UPlayerUIUSerWidget* PlayerUI;
 
+	bool bPLayerHasUI = false;
+
+// player ID
+	int PlayerID;
+	
 	// weapon stats
 	float currentFireTimeLeft = 0.0;
 	UPROPERTY(EditAnywhere)
@@ -106,6 +115,8 @@ private:
 	void Aim();
 	void UnAim();
 	void BeginReload();
+
+	void Reload();
 	
 	void JumpPressed();
 };
