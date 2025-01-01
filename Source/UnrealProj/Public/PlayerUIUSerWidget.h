@@ -27,4 +27,10 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	FString PlayerTwoWeaponString = TEXT("WEAPON P2");
 	
+	UPROPERTY(BlueprintReadWrite)
+	FString PlayerOneHealthText = TEXT("200");
+
+	UPROPERTY(BlueprintReadWrite)
+	FString PlayerTwoHealthText = TEXT("200");
+	
 };

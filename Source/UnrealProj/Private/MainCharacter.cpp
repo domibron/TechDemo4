@@ -77,11 +77,13 @@ void AMainCharacter::Tick(float DeltaTime)
 		if (PlayerID == 0)
 		{
 			PlayerUI->PlayerOneHealthPercentage = healthRes;
+			PlayerUI->PlayerOneHealthText = FString::SanitizeFloat(floor(CurrentHealth));
 			PlayerUI->PlayerOneWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
 		}
 		else
 		{
 			PlayerUI->PlayerTwoHealthPercentage = healthRes;
+			PlayerUI->PlayerTwoHealthText = FString::SanitizeFloat(floor(CurrentHealth));
 			PlayerUI->PlayerTwoWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
 
 		}
