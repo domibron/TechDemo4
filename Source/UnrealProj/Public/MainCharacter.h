@@ -38,7 +38,8 @@ public:
 	UPROPERTY(EditAnywhere)
 	float ReloadDuration = 2.0f;
 
-	
+	UPROPERTY(EditAnywhere)
+	float DamageIndicatorDuration = 2.0;
 
 	
 private:
@@ -49,6 +50,8 @@ private:
 	UNiagaraComponent* NiagaraSystem;
 	UPlayerUIUSerWidget* PlayerUI;
 
+	float DamageIndicatorTimeRemaining = 0.0f;
+	
 	bool bPLayerHasUI = false;
 
 // player ID
@@ -98,7 +101,10 @@ public:
 	void TakeDamage(float DamageAmount);
 	void Heal(float HealAmmount);
 	void GiveAmmo(int Ammount);
+	
 	void GiveDamageBuff(float Mult, float Duration);
+
+	static float LerpFloat(float a, float b, float t);
 
 private:
 

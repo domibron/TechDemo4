@@ -18,19 +18,30 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	float PlayerOneHealthPercentage = 1.0;
 
-	UPROPERTY(BlueprintReadWrite)
-	float PlayerTwoHealthPercentage = 1.0;
+	// UPROPERTY(BlueprintReadWrite)
+	// float PlayerTwoHealthPercentage = 1.0;
 
 	UPROPERTY(BlueprintReadWrite)
 	FString PlayerOneWeaponString = TEXT("WEAPON P1");
 
-	UPROPERTY(BlueprintReadWrite)
-	FString PlayerTwoWeaponString = TEXT("WEAPON P2");
+	// UPROPERTY(BlueprintReadWrite)
+	// FString PlayerTwoWeaponString = TEXT("WEAPON P2");
 	
 	UPROPERTY(BlueprintReadWrite)
 	FString PlayerOneHealthText = TEXT("200");
 
+	// UPROPERTY(BlueprintReadWrite)
+	// FString PlayerTwoHealthText = TEXT("200");
+
 	UPROPERTY(BlueprintReadWrite)
-	FString PlayerTwoHealthText = TEXT("200");
-	
+	FLinearColor DamageColor = FLinearColor(1.0,1.0,1.0,0.0);
+
+	float DamageTrancparancyAmmount = 0.0;
+
+	float DamageMaxTransparancyAmmount = 0.3;
+
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor DamageMultColor = FLinearColor(1.0,1.0,1.0,0.0);
+
+	float DamageMultTrancparancyAmmount = 0.0;
 };

@@ -19,8 +19,10 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	bPLayerHasUI = false;
 	PlayerID = GetPlatformUserId();
+
+	GLog->Log("ID is " + GetPlatformUserId());
 	
 	CameraComponent = FindComponentByClass<UCameraComponent>();
 	NiagaraSystem = FindComponentByClass<UNiagaraComponent>();
@@ -31,16 +33,27 @@ void AMainCharacter::BeginPlay()
 
 	TArray<UUserWidget*> FoundWidgets;
 	UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UPlayerUIUSerWidget::StaticClass(), true);
-
-	if (FoundWidgets.Num() > 0)
+	
+	for (int i = 0; i < FoundWidgets.Num(); i++)
 	{
-		PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[0]);
-		
+		if (FoundWidgets[i]->GetOwningPlayer() == GetController())
+		{
+			PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[i]);
+		}
 	}
-
+	
+	// if (FoundWidgets.Num() > 0 && PlayerID < FoundWidgets.Num() && PlayerID >= 0)
+	// {
+	// 	UUserWidget* foundUI = FoundWidgets[PlayerID];
+	// 	if (foundUI->GetOwningPlayer() == GetController())
+	// 	if (foundUI) PlayerUI = Cast<UPlayerUIUSerWidget>(foundUI);
+	// }
+	
+	
+ 
 	if (PlayerUI)
 	{
-		GLog->Log("Found UI");
+		GLog->Log( GetName() +" Found UI " + FString::FromInt(FoundWidgets.Num()) + " " + FString::FromInt(GetPlatformUserId()));
 		bPLayerHasUI = true;
 	}
 	
@@ -51,7 +64,19 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (DamageMultiplierDurationRemainder > 0)
+	{
+		DamageMultiplierDurationRemainder -= DeltaTime;
+	}
+	else
+	{
+		DamageMultiplier = 1.0f;
+	}
 	
+	if (DamageIndicatorTimeRemaining > 0)
+	{
+		DamageIndicatorTimeRemaining -= DeltaTime;
+	}
 	
 	if (ReloadTimeLeft > 0)
 	{
@@ -74,30 +99,47 @@ void AMainCharacter::Tick(float DeltaTime)
 	{
 		
 		
-		if (PlayerID == 0)
-		{
+		// if (PlayerID == 0)
+		// {
 			PlayerUI->PlayerOneHealthPercentage = healthRes;
 			PlayerUI->PlayerOneHealthText = FString::SanitizeFloat(floor(CurrentHealth));
 			PlayerUI->PlayerOneWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
-		}
-		else
-		{
-			PlayerUI->PlayerTwoHealthPercentage = healthRes;
-			PlayerUI->PlayerTwoHealthText = FString::SanitizeFloat(floor(CurrentHealth));
-			PlayerUI->PlayerTwoWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
 
-		}
+			PlayerUI->DamageColor = FLinearColor(1.0, 0.0,0.0, LerpFloat(0, PlayerUI->DamageMaxTransparancyAmmount, DamageIndicatorTimeRemaining / DamageIndicatorDuration));
+
+			PlayerUI->DamageMultColor = FLinearColor(1.0, 1.0,1.0, LerpFloat(0, 1, DamageMultiplierDurationRemainder));
+
+		//
+
+		// }
+		// else
+		// {
+		// 	PlayerUI->PlayerTwoHealthPercentage = healthRes;
+		// 	PlayerUI->PlayerTwoHealthText = FString::SanitizeFloat(floor(CurrentHealth));
+		// 	PlayerUI->PlayerTwoWeaponString = (bReloading) ? "Reloading [" + FString::SanitizeFloat((floor(ReloadTimeLeft * 100)) / 100) + "]" : FString::FromInt(AmmoInClip) + " / " + FString::FromInt(AmmoPool);
+		//
+		// }
 	}
 	else
 	{
 		TArray<UUserWidget*> FoundWidgets;
 		UWidgetBlueprintLibrary::GetAllWidgetsOfClass(GetWorld(), FoundWidgets, UPlayerUIUSerWidget::StaticClass(), true);
 
-		if (FoundWidgets.Num() > 0)
+		for (int i = 0; i < FoundWidgets.Num(); i++)
 		{
-			PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[0]);
-		
+			if (FoundWidgets[i]->GetOwningPlayer() == GetController())
+			{
+				PlayerUI = Cast<UPlayerUIUSerWidget>(FoundWidgets[i]);
+			}
 		}
+		
+		// if (FoundWidgets.Num() > 0 && PlayerID < FoundWidgets.Num() && PlayerID >= 0)
+		// {
+		// 	UUserWidget* foundUI = FoundWidgets[PlayerID];
+		// 		
+		// 	if (foundUI) PlayerUI = Cast<UPlayerUIUSerWidget>(foundUI);
+		// }
+		
 
 		if (PlayerUI)
 		{
@@ -202,6 +244,10 @@ void AMainCharacter::TakeDamage(float DamageAmount)
 {
 	CurrentHealth -= DamageAmount;
 	GLog->Log(this->GetName() + " " + FString::SanitizeFloat(CurrentHealth));
+
+	
+	DamageIndicatorTimeRemaining += DamageIndicatorDuration / 4.0;
+	if(DamageIndicatorTimeRemaining > DamageIndicatorDuration) DamageIndicatorTimeRemaining = DamageIndicatorDuration;
 }
 
 void AMainCharacter::Heal(float HealAmmount)
@@ -223,6 +269,11 @@ void AMainCharacter::GiveDamageBuff(float Mult, float Duration)
 {
 	DamageMultiplier = Mult;
 	DamageMultiplierDurationRemainder = Duration;
+}
+
+float AMainCharacter::LerpFloat(float a, float b, float t)
+{
+	return a + (b - a) * t;
 }
 
 void AMainCharacter::ReloadAmmo()
@@ -313,11 +364,11 @@ void AMainCharacter::Fire()
 		{
 			if(Hit.GetComponent()->ComponentHasTag("Head"))
 			{
-				player->TakeDamage(headDamage);
+				player->TakeDamage(headDamage * DamageMultiplier);
 			}
 			else if(Hit.GetComponent()->ComponentHasTag("Body"))
 			{
-				player->TakeDamage(bodyDamage);
+				player->TakeDamage(bodyDamage * DamageMultiplier);
 				
 			}
 			
