@@ -3,6 +3,7 @@
 
 #include "ACollectable.h"
 
+#include "ACollectableSpawner.h"
 
 
 // Sets default values
@@ -24,6 +25,14 @@ void AACollectable::PostInitializeComponents()
 	StaticMesh->OnComponentBeginOverlap.AddDynamic(this, &AACollectable::CollidedWith);
 }
 
+
+void AACollectable::SetVisible(bool bVisible)
+{
+	SetActorHiddenInGame(!bVisible);
+	SetActorEnableCollision(bVisible);
+	SetActorTickEnabled(bVisible);
+	// StaticMesh->SetHiddenInGame(!bVisible, true);
+}
 
 // Called when the game starts or when spawned
 void AACollectable::BeginPlay()
@@ -62,6 +71,9 @@ void AACollectable::SetUp()
 
 
 	bCollected = false;
+
+	// call the function pointer;
+	// if (CollectFuntionCall) this->*CollectFuntionCall;
 }
 
 void AACollectable::CollidedWith(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -91,6 +103,9 @@ void AACollectable::CollidedWith(UPrimitiveComponent* OverlappedComponent, AActo
 		}
 
 		bCollected = true;
+		
+		if (Spawner) Spawner->ReturnActorToPool(this);
+		
 		// call function to collect and remove from scene to go back in the pool.
 		
 	}

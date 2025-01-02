@@ -4,9 +4,15 @@
 
 #include "MainCharacter.h"
 
+
+
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "ACollectable.generated.h"
+
+// forward declaration. prevent the compiler from entering a endless loop. We tell it to look at this class first, then this.
+class AACollectableSpawner;
 
 UENUM()
 enum ECollectableType
@@ -45,6 +51,16 @@ public:
 	UPROPERTY(EditAnywhere)
 	UMaterial* BlueMat;
 
+	void SetVisible(bool bVisible);
+
+	
+	bool bSpawned = false;
+
+	AACollectableSpawner* Spawner = nullptr;
+	
+	// typedef void(*funcPointer)(AActor*);
+	//
+	// funcPointer CollectFuntionCall = nullptr;
 	
 protected:
 	// Called when the game starts or when spawned
@@ -69,4 +85,5 @@ private:
 	void DamageMult(AMainCharacter* Player);
 
 	bool bCollected = false;
+
 };
