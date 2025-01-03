@@ -78,6 +78,7 @@ void AACollectableSpawner::TryToSpawnCollectable()
 					CollectablePool[i]->SetActorLocation(locationToMoveTo);
 					CollectablePool[i]->SetVisible(true);
 					CollectablePool[i]->bSpawned = true;
+					CollectablePool[i]->SetUp();
 				}
 				break;
 			}

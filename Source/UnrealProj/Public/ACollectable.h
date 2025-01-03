@@ -19,7 +19,7 @@ enum ECollectableType
 {
 	Heal = 0,
 	Ammo = 1,
-	DamageMult = 2,s
+	DamageMult = 2,
 	
 };
 
