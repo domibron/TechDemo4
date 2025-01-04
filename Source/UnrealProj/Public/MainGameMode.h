@@ -6,6 +6,9 @@
 #include "GameFramework/GameModeBase.h"
 #include "Blueprint/UserWidget.h"
 #include "GameUIWidget.h"
+#include "MainGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+
 
 #include "MainGameMode.generated.h"
 
@@ -25,6 +28,8 @@ public:
 	UPROPERTY(EditAnywhere,BlueprintReadWrite,Category = "Widgets")
 	UGameUIWidget* GlobalUIWidget;
 
+	UMainGameInstance* MainGameInstance;
+	
 	UPROPERTY(EditAnywhere)
 	float DefultTime = 300.0f;
 	
@@ -34,5 +39,20 @@ public:
 
 	virtual void Tick(float DeltaSeconds) override;;
 
+	void PlayerDied(int PlayerID);
+
+	bool bGameEnded = false;
+
+	void OnGameEnd(int WinnerID);
+
+	UPROPERTY(EditAnywhere)
+	float DelayLevelLoadTime = 2;
 	
+	float timer = 0;
+
+	bool bLoadLevel = false;
+
+	void LoadLevel(FName LevelName);
+
+	FName NameOfLevelToLoad;
 };

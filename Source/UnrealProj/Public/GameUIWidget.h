@@ -16,7 +16,7 @@ class UNREALPROJ_API UGameUIWidget : public UUserWidget
 
 
 public:
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FString GameTimeAsString = "999";
 
 	UPROPERTY(BlueprintReadWrite)
@@ -24,4 +24,10 @@ public:
 	
 	UPROPERTY(BlueprintReadWrite)
 	FString PlayerTwoScore = "0";
+
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor WinnerColor = FLinearColor(1,1,1,0);
+
+	UPROPERTY(BlueprintReadWrite)
+	FString WinnereText = TEXT("Winner is player 1");
 };

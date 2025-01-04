@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "MainGameMode.h"
 #include "GameFramework/Character.h"
 #include "Camera/CameraComponent.h"
 
@@ -11,6 +12,9 @@
 
 	#include "NiagaraFunctionLibrary.h"
 	#include "NiagaraComponent.h"
+
+#include "MainGameMode.h"
+#include "Components/AudioComponent.h"
 
 // keep here otherwise it will break
 #include "MainCharacter.generated.h"
@@ -49,6 +53,14 @@ private:
 	UCameraComponent* CameraComponent;
 	UNiagaraComponent* NiagaraSystem;
 	UPlayerUIUSerWidget* PlayerUI;
+	AMainGameMode* MainGameMode;
+
+	UAudioComponent* AudioComponent;
+
+	UPROPERTY(EditAnywhere)
+	USoundBase* ShootSFX;
+	UPROPERTY(EditAnywhere)
+	USoundBase* DeathSFX;
 
 	float DamageIndicatorTimeRemaining = 0.0f;
 	

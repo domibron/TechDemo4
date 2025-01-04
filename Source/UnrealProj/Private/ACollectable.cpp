@@ -39,6 +39,9 @@ void AACollectable::BeginPlay()
 {
 	Super::BeginPlay();
 
+	AudioComponent = FindComponentByClass<UAudioComponent>();
+	AudioComponent->SetSound(CollectSFX);
+	
 	SetUp();
 	
 }
@@ -102,6 +105,8 @@ void AACollectable::CollidedWith(UPrimitiveComponent* OverlappedComponent, AActo
 
 		}
 
+		AudioComponent->Play();
+		
 		bCollected = true;
 		
 		if (Spawner) Spawner->ReturnActorToPool(this);

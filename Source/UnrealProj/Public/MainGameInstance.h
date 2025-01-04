@@ -18,4 +18,9 @@ public:
 	virtual void OnStart() override;
 
 	APlayerController* GetPlayerWithID(int id);
+
+	int PlayerOneScore = 0;
+	int PlayerTwoScore = 0;
+
+	void StartGame(FName LevelName);
 };

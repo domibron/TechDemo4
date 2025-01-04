@@ -19,14 +19,17 @@ AMainCharacter::AMainCharacter()
 void AMainCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	MainGameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode());
+	
 	bPLayerHasUI = false;
-	PlayerID = GetPlatformUserId();
-
+	
 	GLog->Log("ID is " + GetPlatformUserId());
+	PlayerID = GetPlatformUserId();
 	
 	CameraComponent = FindComponentByClass<UCameraComponent>();
 	NiagaraSystem = FindComponentByClass<UNiagaraComponent>();
-
+	AudioComponent =  FindComponentByClass<UAudioComponent>();
 	
 	
 	CurrentHealth = MaxHealth;
@@ -64,6 +67,27 @@ void AMainCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	
+	
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
+	if (CurrentHealth <= 0)
+	{
+		AudioComponent->SetSound(DeathSFX);
+		AudioComponent->Play();
+		
+		if (AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode()))
+		{
+			GameMode->PlayerDied(GetPlatformUserId());
+		}
+
+		
+	}
+	
 	if (DamageMultiplierDurationRemainder > 0)
 	{
 		DamageMultiplierDurationRemainder -= DeltaTime;
@@ -94,6 +118,8 @@ void AMainCharacter::Tick(float DeltaTime)
 	}
 
 	float healthRes = CurrentHealth / MaxHealth;
+
+	
 	
 	if(bPLayerHasUI) // I hate player spawning. would override but cannot be bothered. this works fine :3
 	{
@@ -279,6 +305,13 @@ float AMainCharacter::LerpFloat(float a, float b, float t)
 
 void AMainCharacter::ReloadAmmo()
 {
+
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	if (bReloading) return;
 
 	int ammoToTake = 0;
@@ -298,16 +331,34 @@ void AMainCharacter::ReloadAmmo()
 
 void AMainCharacter::MoveForward(float Value)
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorForwardVector(), Value, true);
 }
 
 void AMainCharacter::MoveRight(float Value)
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorRightVector(), Value, true);
 }
 
 void AMainCharacter::LookRight(float Value)
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	// FRotator rotation = GetActorRotation();
 	//
 	// rotation += FRotator(0, Value, 0);
@@ -319,17 +370,30 @@ void AMainCharacter::LookRight(float Value)
 
 void AMainCharacter::LookUp(float Value)
 {
-
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
 	
 	AddControllerPitchInput(Value * -1.0f);
 }
 
 void AMainCharacter::Fire()
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	if (currentFireTimeLeft > 0 || AmmoInClip <= 0 || bReloading) return;
 
 	currentFireTimeLeft = 1.0 / fireRate;
 	AmmoInClip -= 1;
+
+	AudioComponent->SetSound(ShootSFX);
+	AudioComponent->Play();
 	
 	FHitResult Hit;
 
@@ -380,18 +444,31 @@ void AMainCharacter::Fire()
 
 void AMainCharacter::Aim()
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	CameraComponent->FieldOfView = 30.0f;
 	bAiming = true;
 }
 
 void AMainCharacter::UnAim()
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	CameraComponent->FieldOfView = 90.0f;
 	bAiming = false;
 }
 
 void AMainCharacter::BeginReload()
 {
+	
 	if (AmmoPool > 0 && !bReloading && AmmoInClip < MaxClipSize)
 	{
 		ReloadTimeLeft = ReloadDuration;
@@ -401,6 +478,12 @@ void AMainCharacter::BeginReload()
 
 void AMainCharacter::Reload()
 {
+	if (MainGameMode)
+	{
+		if (MainGameMode->bGameEnded)
+			return;
+	}
+	
 	BeginReload();
 }
 

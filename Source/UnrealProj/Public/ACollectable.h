@@ -5,7 +5,7 @@
 #include "MainCharacter.h"
 
 
-
+#include "Components/AudioComponent.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -33,6 +33,12 @@ public:
 	AACollectable();
 
 	UStaticMeshComponent* StaticMesh;
+
+	UAudioComponent* AudioComponent;
+
+	
+	UPROPERTY(EditAnywhere)
+	USoundBase* CollectSFX;
 
 	ECollectableType CollectableType = ECollectableType::Heal;
 
