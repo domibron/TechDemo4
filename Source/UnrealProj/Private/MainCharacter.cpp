@@ -108,6 +108,7 @@ void AMainCharacter::Tick(float DeltaTime)
 			PlayerUI->DamageColor = FLinearColor(1.0, 0.0,0.0, LerpFloat(0, PlayerUI->DamageMaxTransparancyAmmount, DamageIndicatorTimeRemaining / DamageIndicatorDuration));
 
 			PlayerUI->DamageMultColor = FLinearColor(1.0, 1.0,1.0, LerpFloat(0, 1, DamageMultiplierDurationRemainder));
+		
 
 		//
 

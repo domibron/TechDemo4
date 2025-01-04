@@ -13,5 +13,9 @@ UCLASS()
 class UNREALPROJ_API UMainGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
+
+public:
+	virtual void OnStart() override;
+
+	APlayerController* GetPlayerWithID(int id);
 };

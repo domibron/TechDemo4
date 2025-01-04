@@ -3,3 +3,16 @@
 
 #include "PlayerUIUSerWidget.h"
 
+void UPlayerUIUSerWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	
+}
+
+void UPlayerUIUSerWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	
+}

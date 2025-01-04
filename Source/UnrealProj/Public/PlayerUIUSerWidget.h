@@ -44,4 +44,17 @@ public:
 	FLinearColor DamageMultColor = FLinearColor(1.0,1.0,1.0,0.0);
 
 	float DamageMultTrancparancyAmmount = 0.0;
+
+	UPROPERTY(BlueprintReadWrite)
+	float CurrentTime = 300.0f;
+
+	int PlayerOneWins = 0;
+
+	int PlayerTwoWins = 0;
+
+	virtual void NativeConstruct() override;
+	
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+
+	
 };
