@@ -31,7 +31,7 @@ public:
 	UMainGameInstance* MainGameInstance;
 	
 	UPROPERTY(EditAnywhere)
-	float DefultTime = 300.0f;
+	float DefultTime = 180.0f;
 	
 	float CurrentTime = 300.0f;
 	
