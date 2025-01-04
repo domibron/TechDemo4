@@ -421,12 +421,12 @@ void AMainCharacter::Fire()
 	
 	if (bHasHit)
 	{
-		GLog->Log("Hit: " + Hit.GetActor()->GetName());
 		
 		AMainCharacter* player = Cast<AMainCharacter>(Hit.GetActor());
 
 		if (player)
 		{
+			GLog->Log("Hit: " + Hit.GetActor()->GetName());
 			if(Hit.GetComponent()->ComponentHasTag("Head"))
 			{
 				player->TakeDamage(headDamage * DamageMultiplier);
