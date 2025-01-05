@@ -45,6 +45,12 @@ public:
 	UPROPERTY(EditAnywhere)
 	float DamageIndicatorDuration = 2.0;
 
+	// aiming
+	bool bAiming = false;
+
+	// player ID
+	int PlayerID;
+
 	
 private:
 
@@ -66,8 +72,7 @@ private:
 	
 	bool bPLayerHasUI = false;
 
-// player ID
-	int PlayerID;
+
 	
 	// weapon stats
 	float currentFireTimeLeft = 0.0;
@@ -80,8 +85,7 @@ private:
 	UPROPERTY(EditAnywhere)
 	float headDamage = 50.0f;
 
-	// aiming
-	bool bAiming = false;
+	
 	bool bLaserActive = true;
 
 
@@ -93,7 +97,8 @@ private:
 
 	float DamageMultiplier = 1.0;
 	float DamageMultiplierDurationRemainder = 0.0f;
-
+	
+	
 
 	
 // ======= functions =======

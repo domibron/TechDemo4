@@ -5,12 +5,12 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
-
+#include "MainCharacter.h"
 
 #include "PlayerAnimInstance.generated.h"
 
 /**
- * 
+ * a
  */
 UCLASS()
 class UNREALPROJ_API UPlayerAnimInstance : public UAnimInstance
@@ -31,5 +31,10 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
 	class APawn* Pawn;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
+	FVector MoveDirection;
+
+	AMainCharacter* PlayerCharacter;
 	
 };

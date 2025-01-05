@@ -337,6 +337,9 @@ void AMainCharacter::MoveForward(float Value)
 			return;
 	}
 	
+
+	//GLog->Log(FString::SanitizeFloat(Value));
+	
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorForwardVector(), Value, true);
 }
 
@@ -348,6 +351,7 @@ void AMainCharacter::MoveRight(float Value)
 			return;
 	}
 	
+
 	AMainCharacter::AddMovementInput(AMainCharacter::GetActorRightVector(), Value, true);
 }
 
@@ -365,6 +369,8 @@ void AMainCharacter::LookRight(float Value)
 	//
 	// SetActorRotation(rotation);
 
+	
+
 	AddControllerYawInput(Value);
 }
 
@@ -375,6 +381,7 @@ void AMainCharacter::LookUp(float Value)
 		if (MainGameMode->bGameEnded)
 			return;
 	}
+
 	
 	AddControllerPitchInput(Value * -1.0f);
 }
