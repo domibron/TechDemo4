@@ -221,7 +221,7 @@ void AMainCharacter::Tick(float DeltaTime)
 	//if (AutoReceiveInput == 1) GLog->Log("Player1");
 	//if (AutoReceiveInput == 2) GLog->Log("Player2");
 	//GLog->Log(FString::FromInt(AutoReceiveInput));
-
+	
 	if (NiagaraSystem && bAiming)
 	{
 		if(!bLaserActive)
@@ -293,7 +293,7 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("AimKey", IE_Pressed, this, &AMainCharacter::Aim);
 		PlayerInputComponent->BindAction("AimKey", IE_Released, this, &AMainCharacter::UnAim);
 	
-		PlayerInputComponent->BindAction("ReloadKey", IE_Pressed, this, &AMainCharacter::Reload);
+		PlayerInputComponent->BindAction("QuitKey", IE_Pressed, this, &AMainCharacter::QuitToMainMenu);
 
 
 	
@@ -548,6 +548,14 @@ void AMainCharacter::Reload()
 void AMainCharacter::JumpPressed()
 {
 	Jump();
+}
+//MARK: asdsd adas
+void AMainCharacter::QuitToMainMenu()
+{
+	if (AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		GameMode->LoadLevel("MainMenu");
+	}
 }
 
 float AMainCharacter::DotProductFVector(FVector v1, FVector v2)

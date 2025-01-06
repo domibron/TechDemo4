@@ -163,4 +163,6 @@ private:
 	void Reload();
 	
 	void JumpPressed();
+
+	void QuitToMainMenu();
 };
