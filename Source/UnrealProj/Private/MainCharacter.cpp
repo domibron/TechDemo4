@@ -116,6 +116,10 @@ void AMainCharacter::Tick(float DeltaTime)
 	{
 		AudioComponent->SetSound(DeathSFX);
 		AudioComponent->Play();
+
+		SkeletalMesh->SetSimulatePhysics(true);
+		SkeletalMesh->SetPhysicsBlendWeight(1.0);
+		SkeletalMesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		
 		if (AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode()))
 		{
@@ -292,6 +296,9 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 		PlayerInputComponent->BindAction("FireKey", IE_Pressed, this, &AMainCharacter::Fire);
 		PlayerInputComponent->BindAction("AimKey", IE_Pressed, this, &AMainCharacter::Aim);
 		PlayerInputComponent->BindAction("AimKey", IE_Released, this, &AMainCharacter::UnAim);
+
+	PlayerInputComponent->BindAction("ReloadKey", IE_Pressed, this, &AMainCharacter::Reload);
+
 	
 		PlayerInputComponent->BindAction("QuitKey", IE_Pressed, this, &AMainCharacter::QuitToMainMenu);
 
@@ -367,13 +374,13 @@ void AMainCharacter::ReloadAmmo()
 
 	int ammoToTake = 0;
 	
-	if (AmmoPool >= MaxClipSize)
+	if (AmmoPool >= (MaxClipSize - AmmoInClip))
 	{
 		ammoToTake = MaxClipSize - AmmoInClip;
 	}
-	else if (AmmoPool < MaxClipSize && AmmoPool > 0)
+	else if (AmmoPool < (MaxClipSize - AmmoInClip) && AmmoPool > 0)
 	{
-		ammoToTake = AmmoPool;
+			ammoToTake = AmmoPool;
 	}
 
 	AmmoInClip += ammoToTake;
