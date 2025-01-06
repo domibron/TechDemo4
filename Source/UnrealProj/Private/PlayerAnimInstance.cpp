@@ -12,7 +12,7 @@ void UPlayerAnimInstance::NativeInitializeAnimation()
 		Pawn = TryGetPawnOwner();
 	}
 
-	if (Pawn != nullptr && PlayerCharacter == nullptr)
+	if ( PlayerCharacter == nullptr && GetOwningActor())
 	{
 		PlayerCharacter = Cast<AMainCharacter>(GetOwningActor());
 	}
@@ -27,7 +27,7 @@ void UPlayerAnimInstance::CustomUpdateAnimation()
 		Pawn = TryGetPawnOwner();
 	}
 
-	if (PlayerCharacter == nullptr)
+	if (PlayerCharacter == nullptr && GetOwningActor())
 	{
 		PlayerCharacter = Cast<AMainCharacter>(GetOwningActor());
 	}
@@ -46,7 +46,13 @@ void UPlayerAnimInstance::CustomUpdateAnimation()
 		if (PlayerCharacter)
 		{
 			MoveDirection = Pawn->GetActorRotation().UnrotateVector(Pawn->GetLastMovementInputVector());
+			bIsAiming =  PlayerCharacter->bAiming;
+			bIsReloading = PlayerCharacter->bReloading;
 			
+			SpineXRotation = -(PlayerCharacter->DotProductCamAngle * 90.0f);
 		}
+		
 	}
 }
+
+

@@ -13,8 +13,11 @@
 	#include "NiagaraFunctionLibrary.h"
 	#include "NiagaraComponent.h"
 
+#include "Materials/Material.h"
+
 #include "MainGameMode.h"
 #include "Components/AudioComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 // keep here otherwise it will break
 #include "MainCharacter.generated.h"
@@ -49,18 +52,36 @@ public:
 	bool bAiming = false;
 
 	// player ID
-	int PlayerID;
+	int PlayerID = -1;
 
+	
+	USkeletalMeshComponent* SkeletalMesh;
+
+	UPROPERTY(EditAnywhere)
+	UMaterial* PlayerOneMat;
+
+	UPROPERTY(EditAnywhere)
+	UMaterial* PlayerTwoMat;
+
+	bool bReloading = false;
+	UCameraComponent* CameraComponent;
+
+	UPROPERTY(EditAnywhere)
+	UStaticMeshComponent* LaserStartMesh;
+	
+	float DotProductCamAngle;
+
+	static float DotProductFVector(FVector v1, FVector v2);
 	
 private:
 
 	
 	// resfs.
-	UCameraComponent* CameraComponent;
 	UNiagaraComponent* NiagaraSystem;
 	UPlayerUIUSerWidget* PlayerUI;
 	AMainGameMode* MainGameMode;
-
+	USpringArmComponent* CameraBoom;
+		
 	UAudioComponent* AudioComponent;
 
 	UPROPERTY(EditAnywhere)
@@ -93,12 +114,12 @@ private:
 	int AmmoInClip = 10;
 
 	float ReloadTimeLeft = 0.0f;
-	bool bReloading = false;
+	
 
 	float DamageMultiplier = 1.0;
 	float DamageMultiplierDurationRemainder = 0.0f;
 	
-	
+	bool bSetMat = false;
 
 	
 // ======= functions =======

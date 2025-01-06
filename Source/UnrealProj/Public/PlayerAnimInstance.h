@@ -36,5 +36,18 @@ public:
 	FVector MoveDirection;
 
 	AMainCharacter* PlayerCharacter;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
+	float SpineXRotation = 0;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
+	bool bFiring = false;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
+	bool bIsAiming = false;
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "CustomAnim")
+	bool bIsReloading = false;
+
 	
 };

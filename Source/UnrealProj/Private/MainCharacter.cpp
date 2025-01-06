@@ -4,7 +4,7 @@
 
 #include "MainCharacter.h"
 
-
+#include "MyCustomPlayerController.h"
 
 
 // Sets default values
@@ -23,14 +23,17 @@ void AMainCharacter::BeginPlay()
 	MainGameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode());
 	
 	bPLayerHasUI = false;
-	
-	GLog->Log("ID is " + GetPlatformUserId());
-	PlayerID = GetPlatformUserId();
+	if (GetController()) PlayerID = Cast<AMyCustomPlayerController>(GetController())->GetLocalPlayer()->GetLocalPlayerIndex();
+	GLog->Log("ID is " + PlayerID);
 	
 	CameraComponent = FindComponentByClass<UCameraComponent>();
 	NiagaraSystem = FindComponentByClass<UNiagaraComponent>();
 	AudioComponent =  FindComponentByClass<UAudioComponent>();
-	
+	SkeletalMesh = FindComponentByClass<USkeletalMeshComponent>();
+
+	CameraBoom = FindComponentByClass<USpringArmComponent>();
+
+	LaserStartMesh = FindComponentByTag<UStaticMeshComponent>("LaserStart");
 	
 	CurrentHealth = MaxHealth;
 
@@ -56,10 +59,23 @@ void AMainCharacter::BeginPlay()
  
 	if (PlayerUI)
 	{
-		GLog->Log( GetName() +" Found UI " + FString::FromInt(FoundWidgets.Num()) + " " + FString::FromInt(GetPlatformUserId()));
+		GLog->Log( GetName() +" Found UI " + FString::FromInt(FoundWidgets.Num()) + " " + FString::FromInt(PlayerID));
 		bPLayerHasUI = true;
 	}
-	
+
+	if (SkeletalMesh && PlayerOneMat && PlayerTwoMat && !bSetMat)
+	{
+		if (PlayerID == 0)
+		{
+			SkeletalMesh->SetMaterial(0, PlayerOneMat);
+			bSetMat = true;
+		}
+		else if (PlayerID == 1)
+		{
+			SkeletalMesh->SetMaterial(0, PlayerTwoMat);
+			bSetMat = true;
+		}
+	}
 }
 
 // Called every frame
@@ -74,6 +90,27 @@ void AMainCharacter::Tick(float DeltaTime)
 		if (MainGameMode->bGameEnded)
 			return;
 	}
+
+	if (GetController() && PlayerID == -1) PlayerID = Cast<AMyCustomPlayerController>(GetController())->GetLocalPlayer()->GetLocalPlayerIndex();
+	
+	if (SkeletalMesh && PlayerOneMat && PlayerTwoMat  && !bSetMat)
+	{
+		if (PlayerID == 0)
+		{
+			SkeletalMesh->SetMaterial(0, PlayerOneMat);
+			bSetMat = true;
+		}
+		else if (PlayerID == 1)
+		{
+			SkeletalMesh->SetMaterial(0, PlayerTwoMat);
+			bSetMat = true;
+		}
+
+		
+		
+		GLog->Log(FString::FromInt(PlayerID));
+		
+	}
 	
 	if (CurrentHealth <= 0)
 	{
@@ -82,7 +119,7 @@ void AMainCharacter::Tick(float DeltaTime)
 		
 		if (AMainGameMode* GameMode = Cast<AMainGameMode>(GetWorld()->GetAuthGameMode()))
 		{
-			GameMode->PlayerDied(GetPlatformUserId());
+			GameMode->PlayerDied(PlayerID);
 		}
 
 		
@@ -119,7 +156,12 @@ void AMainCharacter::Tick(float DeltaTime)
 
 	float healthRes = CurrentHealth / MaxHealth;
 
-	
+	if (CameraBoom)
+	{
+		FRotator camRotation = CameraBoom->GetComponentRotation();
+
+		camRotation.Pitch = FMath::Clamp(camRotation.Pitch, 50, -50);
+	}
 	
 	if(bPLayerHasUI) // I hate player spawning. would override but cannot be bothered. this works fine :3
 	{
@@ -167,7 +209,8 @@ void AMainCharacter::Tick(float DeltaTime)
 		// 	if (foundUI) PlayerUI = Cast<UPlayerUIUSerWidget>(foundUI);
 		// }
 		
-
+		
+		
 		if (PlayerUI)
 		{
 			GLog->Log("Found UI");
@@ -191,8 +234,10 @@ void AMainCharacter::Tick(float DeltaTime)
 		// we could store this constantly. then use it for damage and laser.
 		FHitResult LaserHit;
 
-		FVector StartLocation = CameraComponent->GetComponentLocation();
+		// FVector StartLocation = CameraComponent->GetComponentLocation();
 
+		FVector StartLocation  = LaserStartMesh->GetComponentLocation();
+		
 		FVector EndLocation = (CameraComponent->GetForwardVector() * 200000)+StartLocation;
 
 		FCollisionQueryParams CollisionParams = FCollisionQueryParams();
@@ -201,7 +246,7 @@ void AMainCharacter::Tick(float DeltaTime)
 		CollisionParams.bTraceComplex = true;
 		CollisionParams.TraceTag = TEXT("PLAYER");
 		CollisionParams.AddIgnoredActor(this);
-
+		
 	
 		bool bLaserHit = GetWorld()->LineTraceSingleByChannel(LaserHit, StartLocation, EndLocation, ECollisionChannel::ECC_PhysicsBody, CollisionParams);
 
@@ -213,7 +258,8 @@ void AMainCharacter::Tick(float DeltaTime)
 		{
 			NiagaraSystem->SetVectorParameter("EndLocation", GetActorLocation()+CameraComponent->GetForwardVector()*200000);
 		}
-		NiagaraSystem->SetVectorParameter("StartLocation", GetActorLocation()+FVector(0, 0, 60));
+		
+		NiagaraSystem->SetVectorParameter("StartLocation", StartLocation);
 	}
 	else if (bLaserActive)
 	{
@@ -223,7 +269,8 @@ void AMainCharacter::Tick(float DeltaTime)
 	}
 
 
-	
+	DotProductCamAngle = DotProductFVector(GetActorUpVector(), CameraComponent->GetForwardVector());
+	//GLog->Log(FString::FromInt(DotProductCamAngle) + " " + GetActorUpVector().ToString() + " " + CameraComponent->GetForwardVector().ToString());
 	
 }
 
@@ -266,6 +313,10 @@ void AMainCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	
 
 }
+
+/*
+ *test
+ */
 
 void AMainCharacter::TakeDamage(float DamageAmount)
 {
@@ -497,4 +548,9 @@ void AMainCharacter::Reload()
 void AMainCharacter::JumpPressed()
 {
 	Jump();
+}
+
+float AMainCharacter::DotProductFVector(FVector v1, FVector v2)
+{
+	return v1.X * v2.X + v1.Y * v2.Y+ v1.Z * v2.Z;
 }
