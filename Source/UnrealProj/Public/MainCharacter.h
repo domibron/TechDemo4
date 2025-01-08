@@ -88,6 +88,11 @@ private:
 	USoundBase* ShootSFX;
 	UPROPERTY(EditAnywhere)
 	USoundBase* DeathSFX;
+	
+	UPROPERTY(EditAnywhere)
+	USoundBase* BodyHitSFX;
+	UPROPERTY(EditAnywhere)
+	USoundBase* HeadHitSFX;
 
 	float DamageIndicatorTimeRemaining = 0.0f;
 	
@@ -121,6 +126,9 @@ private:
 	float DamageMultiplierDurationRemainder = 0.0f;
 	
 	bool bSetMat = false;
+
+	FLinearColor HitMarkerColor;
+	float HitMarkerTimer = 0.0f;
 
 	
 // ======= functions =======

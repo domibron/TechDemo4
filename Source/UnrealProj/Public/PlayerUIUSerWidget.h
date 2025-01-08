@@ -56,5 +56,6 @@ public:
 	
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 
-	
+	UPROPERTY(BlueprintReadWrite)
+	FLinearColor HitMarkerColor = FLinearColor(1.0,1.0,1.0,0.0);
 };

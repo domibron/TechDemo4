@@ -166,6 +166,8 @@ void AMainCharacter::Tick(float DeltaTime)
 
 		camRotation.Pitch = FMath::Clamp(camRotation.Pitch, 50, -50);
 	}
+
+	if (HitMarkerTimer > 0) HitMarkerTimer -= DeltaTime;
 	
 	if(bPLayerHasUI) // I hate player spawning. would override but cannot be bothered. this works fine :3
 	{
@@ -179,7 +181,11 @@ void AMainCharacter::Tick(float DeltaTime)
 
 			PlayerUI->DamageColor = FLinearColor(1.0, 0.0,0.0, LerpFloat(0, PlayerUI->DamageMaxTransparancyAmmount, DamageIndicatorTimeRemaining / DamageIndicatorDuration));
 
-			PlayerUI->DamageMultColor = FLinearColor(1.0, 1.0,1.0, LerpFloat(0, 1, DamageMultiplierDurationRemainder));
+		PlayerUI->DamageMultColor = FLinearColor(1.0, 1.0,1.0, LerpFloat(0, 1, DamageMultiplierDurationRemainder));
+
+		HitMarkerColor.A = LerpFloat(0, 1, HitMarkerTimer / 0.3);
+		
+		PlayerUI->HitMarkerColor = HitMarkerColor;
 		
 
 		//
@@ -455,6 +461,7 @@ void AMainCharacter::LookUp(float Value)
 	AddControllerPitchInput(Value * -1.0f);
 }
 
+// MARK: Fire
 void AMainCharacter::Fire()
 {
 	if (MainGameMode)
@@ -503,16 +510,29 @@ void AMainCharacter::Fire()
 		if (player)
 		{
 			GLog->Log("Hit: " + Hit.GetActor()->GetName());
+
+			
 			if(Hit.GetComponent()->ComponentHasTag("Head"))
 			{
 				player->TakeDamage(headDamage * DamageMultiplier);
+
+				HitMarkerColor = FLinearColor::Red;
+				
+				AudioComponent->SetSound(HeadHitSFX);
+				AudioComponent->Play();
 			}
 			else if(Hit.GetComponent()->ComponentHasTag("Body"))
 			{
 				player->TakeDamage(bodyDamage * DamageMultiplier);
+
+				HitMarkerColor = FLinearColor::White;
+				
+				AudioComponent->SetSound(BodyHitSFX);
+				AudioComponent->Play();
 				
 			}
 			
+			HitMarkerTimer = 0.3f;
 			
 		}
 	}
