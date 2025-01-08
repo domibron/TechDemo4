@@ -22,5 +22,7 @@ public:
 	int PlayerOneScore = 0;
 	int PlayerTwoScore = 0;
 
+	int CurrentRound = 0;
+	
 	void StartGame(FName LevelName);
 };

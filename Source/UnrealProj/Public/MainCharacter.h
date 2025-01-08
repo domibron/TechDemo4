@@ -94,6 +94,7 @@ private:
 	bool bPLayerHasUI = false;
 
 
+	float ADSLerpTime = 0.0f;
 	
 	// weapon stats
 	float currentFireTimeLeft = 0.0;

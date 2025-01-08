@@ -43,6 +43,7 @@ void AMainGameMode::Tick(float DeltaSeconds)
 
 	if (timer <= 0 && bLoadLevel)
 	{
+		
 		LoadLevel(NameOfLevelToLoad);
 	}
 	
@@ -96,42 +97,9 @@ void AMainGameMode::OnGameEnd(int WinnerID)
 	else if (WinnerID == 1)
 		MainGameInstance->PlayerTwoScore++;
 
-	if (MainGameInstance->PlayerOneScore >= 3)
-	{
-		timer = DelayLevelLoadTime;
-		
-		// player one wins.
-		if(GlobalUIWidget)
-		{
-			GlobalUIWidget->WinnerColor = FColor::White;
-						
-			GlobalUIWidget->WinnereText = "Player left wins";
-		}
-
-		//MainGameInstance->GetPlayerWithID(1)->Destroy();
-		//MainGameInstance->GetPlayerWithID(0)->bShowMouseCursor = true;
-		
-		NameOfLevelToLoad = FName("MainMenu");
-		bLoadLevel = true;
-	}
-	else if (MainGameInstance->PlayerTwoScore >= 3)
-	{
-		timer = DelayLevelLoadTime;
-		
-		if(GlobalUIWidget)
-		{
-			GlobalUIWidget->WinnerColor = FColor::White;
-			
-			GlobalUIWidget->WinnereText = "Player right wins";
-		}
-
-		MainGameInstance->GetPlayerWithID(1)->Destroy();
-		MainGameInstance->GetPlayerWithID(0)->bShowMouseCursor = true;
-		
-		NameOfLevelToLoad = FName("MainMenu");
-		bLoadLevel = true;
-	}
-	else
+	MainGameInstance->CurrentRound++;
+	
+	if (MainGameInstance->CurrentRound < 5)
 	{
 		// we play again.
 		timer = DelayLevelLoadTime;
@@ -139,7 +107,7 @@ void AMainGameMode::OnGameEnd(int WinnerID)
 		if(GlobalUIWidget)
 		{
 			GlobalUIWidget->WinnerColor = FColor::White;
-			
+				
 			if (WinnerID == 0)
 				GlobalUIWidget->WinnereText = "Player left wins the round";
 			else if (WinnerID == 1)
@@ -147,10 +115,65 @@ void AMainGameMode::OnGameEnd(int WinnerID)
 			else
 				GlobalUIWidget->WinnereText = "No one wins the round";
 		}
-		
-		
+			
+			
 		NameOfLevelToLoad = FName(*(UGameplayStatics::GetCurrentLevelName(GetWorld(), true)));
 		bLoadLevel = true;
+	}
+	else
+	{
+		if (MainGameInstance->PlayerOneScore > MainGameInstance->PlayerTwoScore)
+		{
+			timer = DelayLevelLoadTime;
+		
+			// player one wins.
+			if(GlobalUIWidget)
+			{
+				GlobalUIWidget->WinnerColor = FColor::White;
+						
+				GlobalUIWidget->WinnereText = "Player left wins";
+			}
+
+			//MainGameInstance->GetPlayerWithID(1)->Destroy();
+			//MainGameInstance->GetPlayerWithID(0)->bShowMouseCursor = true;
+		
+			NameOfLevelToLoad = FName("MainMenu");
+			bLoadLevel = true;
+		}
+		else if (MainGameInstance->PlayerOneScore < MainGameInstance->PlayerTwoScore)
+		{
+			timer = DelayLevelLoadTime;
+		
+			if(GlobalUIWidget)
+			{
+				GlobalUIWidget->WinnerColor = FColor::White;
+			
+				GlobalUIWidget->WinnereText = "Player right wins";
+			}
+
+			MainGameInstance->GetPlayerWithID(1)->Destroy();
+			MainGameInstance->GetPlayerWithID(0)->bShowMouseCursor = true;
+		
+			NameOfLevelToLoad = FName("MainMenu");
+			bLoadLevel = true;
+		}
+		else
+		{
+			timer = DelayLevelLoadTime;
+		
+			if(GlobalUIWidget)
+			{
+				GlobalUIWidget->WinnerColor = FColor::White;
+			
+				GlobalUIWidget->WinnereText = "No one wins";
+			}
+
+			MainGameInstance->GetPlayerWithID(1)->Destroy();
+			MainGameInstance->GetPlayerWithID(0)->bShowMouseCursor = true;
+		
+			NameOfLevelToLoad = FName("MainMenu");
+			bLoadLevel = true;
+		}
 	}
 }
 

@@ -225,6 +225,17 @@ void AMainCharacter::Tick(float DeltaTime)
 	//if (AutoReceiveInput == 1) GLog->Log("Player1");
 	//if (AutoReceiveInput == 2) GLog->Log("Player2");
 	//GLog->Log(FString::FromInt(AutoReceiveInput));
+
+	if (bAiming && ADSLerpTime < 1)
+	{
+		ADSLerpTime += DeltaTime * 15.0;
+	}
+	else if (!bAiming && ADSLerpTime > 0)
+	{
+		ADSLerpTime -= DeltaTime * 15.0;
+	}
+
+	CameraComponent->FieldOfView = FMath::Lerp(90.0, 30.0, ADSLerpTime);
 	
 	if (NiagaraSystem && bAiming)
 	{
@@ -464,7 +475,7 @@ void AMainCharacter::Fire()
 
 	FVector StartLocation = CameraComponent->GetComponentLocation();
 
-	FVector EndLocation = (CameraComponent->GetForwardVector() * 200000)+StartLocation;
+	FVector EndLocation = (CameraComponent->GetForwardVector() * 200000) + StartLocation;
 
 	FCollisionQueryParams CollisionParams = FCollisionQueryParams();
 
@@ -515,7 +526,7 @@ void AMainCharacter::Aim()
 			return;
 	}
 	
-	CameraComponent->FieldOfView = 30.0f;
+	// CameraComponent->FieldOfView = 30.0f;
 	bAiming = true;
 }
 
@@ -527,7 +538,7 @@ void AMainCharacter::UnAim()
 			return;
 	}
 	
-	CameraComponent->FieldOfView = 90.0f;
+	//CameraComponent->FieldOfView = 90.0f;
 	bAiming = false;
 }
 

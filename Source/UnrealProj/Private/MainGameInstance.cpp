@@ -19,7 +19,8 @@ void UMainGameInstance::StartGame(FName LevelName)
 {
 	PlayerOneScore = 0;
 	PlayerTwoScore = 0;
-	
+
+	CurrentRound = 0;
 	
 	UGameplayStatics::OpenLevel(GetWorld(), LevelName, true);
 }
